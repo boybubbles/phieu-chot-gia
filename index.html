@@ -5,70 +5,129 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Phiếu chốt giá - Xuất DOCX</title>
   <style>
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;margin:24px;max-width:980px}
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    label{font-size:13px;opacity:.85}
-    input{width:100%;padding:10px;border:1px solid #ddd;border-radius:12px}
-    .card{border:1px solid #eee;border-radius:16px;padding:16px;box-shadow:0 2px 10px rgba(0,0,0,.04);margin:12px 0}
-    button{padding:12px 14px;border:0;border-radius:12px;cursor:pointer;font-weight:700;background:#111;color:#fff}
-    .hint{font-size:13px;opacity:.75}
-    .full{grid-column:1/-1}
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; margin: 24px; max-width: 980px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    label { font-size: 13px; opacity: .85; display:block; margin-bottom: 6px; }
+    input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 12px; }
+    .card { border: 1px solid #eee; border-radius: 16px; padding: 16px; box-shadow: 0 2px 10px rgba(0,0,0,.04); margin: 12px 0; }
+    button { padding: 12px 14px; border: 0; border-radius: 12px; cursor: pointer; font-weight: 700; background: #111; color: #fff; }
+    .hint { font-size: 13px; opacity: .75; margin: 8px 0 0; }
+    .full { grid-column: 1 / -1; }
+    h1 { margin: 0 0 6px; }
+    h2 { margin: 0 0 8px; font-size: 18px; }
+    .rowtitle { margin-top: 8px; font-weight: 800; }
+    .muted { opacity: .7; }
   </style>
 </head>
+
 <body>
-  <h1>Xuất file DOCX giữ y hệt layout</h1>
-  <p class="hint">App dùng <b>template.docx</b> (file gốc đã gắn tag {{...}}) để render ra DOCX mới.</p>
+  <h1>Phiếu chốt giá — Xuất DOCX giữ nguyên layout</h1>
+  <p class="hint">
+    App dùng <b>template.docx</b> (file gốc đã gắn tag <b>{{...}}</b>) để render ra DOCX mới.
+  </p>
 
+  <!-- QR upload -->
   <div class="card">
+    <h2>1) Upload ảnh QR để tự điền</h2>
+    <input id="qrFile" type="file" accept="image/*" />
+    <p class="hint" id="qr-status">Chọn ảnh QR (chụp rõ, không rung). App sẽ tự điền Họ tên/CCCD/Ngày cấp/Địa chỉ nếu có.</p>
+    <img id="qr-preview"
+         style="max-width:320px;display:none;border:1px solid #eee;border-radius:12px;margin-top:10px" />
+    <p class="hint muted">Lưu ý: QR CCCD thường không có SĐT và Nơi cấp, 2 ô đó bạn vẫn nhập tay.</p>
+  </div>
+
+  <!-- Main form -->
+  <div class="card">
+    <h2>2) Nhập thông tin</h2>
     <div class="grid">
-      <div><label>Ngày</label><input id="NGAY" placeholder="vd: 29/12/2025"></div>
-      <div><label>Ngày trả hàng</label><input id="NGAY_TRA_HANG" placeholder="vd: 05/01/2026"></div>
+      <div>
+        <label>Ngày</label>
+        <input id="NGAY" placeholder="vd: 29/12/2025" />
+      </div>
+      <div>
+        <label>Ngày trả hàng</label>
+        <input id="NGAY_TRA_HANG" placeholder="vd: 05/01/2026" />
+      </div>
 
-      <div><label>Họ và tên</label><input id="HO_TEN"></div>
-      <div><label>SĐT</label><input id="SDT"></div>
+      <div>
+        <label>Họ và tên khách hàng</label>
+        <input id="HO_TEN" />
+      </div>
+      <div>
+        <label>SĐT</label>
+        <input id="SDT" />
+      </div>
 
-      <div><label>CCCD/Hộ chiếu</label><input id="CCCD"></div>
-      <div><label>Ngày cấp</label><input id="NGAY_CAP"></div>
+      <div>
+        <label>CCCD/Hộ chiếu số</label>
+        <input id="CCCD" />
+      </div>
+      <div>
+        <label>Ngày cấp</label>
+        <input id="NGAY_CAP" />
+      </div>
 
-      <div><label>Nơi cấp</label><input id="NOI_CAP"></div>
-      <div><label>Địa chỉ thường trú</label><input id="DIA_CHI"></div>
+      <div>
+        <label>Nơi cấp</label>
+        <input id="NOI_CAP" />
+      </div>
+      <div>
+        <label>Địa chỉ thường trú</label>
+        <input id="DIA_CHI" />
+      </div>
 
-      <div class="full"><label>Thành tiền (bằng chữ)</label><input id="TIEN_BANG_CHU"></div>
+      <div class="full">
+        <label>Thành tiền (bằng chữ)</label>
+        <input id="TIEN_BANG_CHU" placeholder="vd: Một trăm sáu mươi ba triệu..." />
+      </div>
     </div>
   </div>
 
+  <!-- Table inputs: manual as requested -->
   <div class="card">
-    <p class="hint"><b>Bảng hàng</b> (1L / 5L / 1KG)</p>
+    <h2>3) Bảng hàng (nhập tay)</h2>
+    <p class="hint">Các ô này map vào tag trong Word: {{1L_SL}}, {{1L_DG}}... Bạn nhập tay, app không tự tính.</p>
+
     <div class="grid">
-      <div class="full"><b>1L</b></div>
+      <div class="full rowtitle">1L</div>
       <div><label>SL</label><input id="1L_SL"></div>
-      <div><label>KL/1SP</label><input id="1L_KL1"></div>
-      <div><label>Tổng KL</label><input id="1L_TKL"></div>
-      <div><label>Đơn giá/chỉ</label><input id="1L_DG"></div>
-      <div class="full"><label>Thành tiền</label><input id="1L_TT"></div>
+      <div><label>KL/1SP (Chỉ)</label><input id="1L_KL1"></div>
+      <div><label>Tổng KL (chỉ)</label><input id="1L_TKL"></div>
+      <div><label>Đơn giá/chỉ (VND)</label><input id="1L_DG"></div>
+      <div class="full"><label>Thành tiền (VND)</label><input id="1L_TT"></div>
 
-      <div class="full"><b>5L</b></div>
+      <div class="full rowtitle">5L</div>
       <div><label>SL</label><input id="5L_SL"></div>
-      <div><label>KL/1SP</label><input id="5L_KL1"></div>
-      <div><label>Tổng KL</label><input id="5L_TKL"></div>
-      <div><label>Đơn giá/chỉ</label><input id="5L_DG"></div>
-      <div class="full"><label>Thành tiền</label><input id="5L_TT"></div>
+      <div><label>KL/1SP (Chỉ)</label><input id="5L_KL1"></div>
+      <div><label>Tổng KL (chỉ)</label><input id="5L_TKL"></div>
+      <div><label>Đơn giá/chỉ (VND)</label><input id="5L_DG"></div>
+      <div class="full"><label>Thành tiền (VND)</label><input id="5L_TT"></div>
 
-      <div class="full"><b>1KG</b></div>
+      <div class="full rowtitle">1KG</div>
       <div><label>SL</label><input id="1KG_SL"></div>
-      <div><label>KL/1SP</label><input id="1KG_KL1"></div>
-      <div><label>Tổng KL</label><input id="1KG_TKL"></div>
-      <div><label>Đơn giá/chỉ</label><input id="1KG_DG"></div>
-      <div class="full"><label>Thành tiền</label><input id="1KG_TT"></div>
+      <div><label>KL/1SP (Chỉ)</label><input id="1KG_KL1"></div>
+      <div><label>Tổng KL (chỉ)</label><input id="1KG_TKL"></div>
+      <div><label>Đơn giá/chỉ (VND)</label><input id="1KG_DG"></div>
+      <div class="full"><label>Thành tiền (VND)</label><input id="1KG_TT"></div>
     </div>
   </div>
 
-  <button id="btn">Tạo file DOCX</button>
-  <p id="status" class="hint"></p>
+  <!-- Generate -->
+  <div class="card">
+    <h2>4) Xuất file Word</h2>
+    <button id="btn">Tạo file DOCX</button>
+    <p id="status" class="hint"></p>
+    <p class="hint muted">Nếu bấm mà báo không tải được template.docx: kiểm tra repo có file <b>template.docx</b> nằm cùng cấp với index.html.</p>
+  </div>
+
+  <!-- Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
 
   <script src="https://cdn.jsdelivr.net/npm/pizzip@3.1.7/dist/pizzip.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/docxtemplater@3.52.0/build/docxtemplater.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
-  <script src="app.js"></script>
+
+  <!-- Your logic -->
+  <script src="./app.js"></script>
 </body>
 </html>
